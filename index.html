@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Security Alert</title>
+  <style>
+    :root{
+      --bg:#061226;
+      --red:#ff3b30;
+      --neon:#00f5ff;
+      --muted:#9aa7b2;
+    }
+    *{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;margin:0;padding:0}
+    body{min-height:100vh;background:linear-gradient(120deg,#031021 0%, #061226 60%);color:#e6f0f6;display:flex;align-items:center;justify-content:center;padding:24px}
+    .card{width:100%;max-width:920px;background:rgba(255,255,255,0.03);border-radius:14px;padding:28px;box-shadow:0 10px 30px rgba(2,6,23,0.6);position:relative;overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
+    .glitch{
+      font-weight:800;font-size:clamp(28px,5vw,48px);letter-spacing:0.5px;
+      color:var(--red);text-transform:uppercase;
+      text-shadow: -2px 0 var(--neon), 2px 0 rgba(255,255,255,0.02);
+      margin-bottom:12px;
+    }
+    .sub{color:var(--muted);margin-bottom:18px}
+    .info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+    .info{background:rgba(0,0,0,0.15);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02)}
+    .info h4{font-size:13px;color:var(--neon);margin-bottom:6px}
+    .info p{font-size:14px;color:#d7eaf1}
+    .action-row{display:flex;gap:12px;flex-wrap:wrap}
+    button{cursor:pointer;padding:10px 14px;border-radius:10px;border:0;font-weight:700}
+    .btn-danger{background:linear-gradient(90deg,#ff5a5a,#ff3b30);color:white}
+    .btn-cool{background:linear-gradient(90deg,#0be1ff,#0088ff);color:#00101a}
+    .reveal{margin-top:18px;background:rgba(0,0,0,0.18);padding:14px;border-radius:12px;border:1px dashed rgba(255,255,255,0.03);display:none}
+    .reveal h3{color:#8cffd5;margin-bottom:8px}
+    .footer{margin-top:16px;color:var(--muted);font-size:13px}
+    .fake-console{background:#000;border-radius:8px;padding:14px;margin-top:18px;font-family:monospace;color:#8cffd5;line-height:1.35;max-height:180px;overflow:auto}
+    /* subtle animated scanline */
+    .scan {
+      position:absolute;left:-30%;top:-50%;width:160%;height:260%;
+      background:linear-gradient(180deg, rgba(255,255,255,0.00) 0%, rgba(0,255,255,0.02) 50%, rgba(255,255,255,0.00) 100%);
+      transform:rotate(12deg);mix-blend-mode:overlay;animation:scan 6s linear infinite;
+      pointer-events:none;opacity:0.6;
+    }
+    @keyframes scan{0%{transform:translateY(-100%) rotate(12deg)}100%{transform:translateY(100%) rotate(12deg)}}
+    /* a tiny glitch flicker */
+    @keyframes flick {
+      0%,100%{opacity:1; transform:translateX(0)}
+      50%{opacity:0.85; transform:translateX(2px)}
+    }
+    .glitch { animation: flick 2.4s infinite; }
+    .note { font-size:13px;color:#ffd7d7;background:rgba(255,0,0,0.06);padding:8px;border-radius:8px;margin-top:12px;border:1px solid rgba(255,0,0,0.06)}
+  </style>
+</head>
+<body>
+  <div class="card" role="main" aria-live="polite">
+    <div class="scan" aria-hidden="true"></div>
+    <div class="glitch">SECURITY BREACH</div>
+    <div class="sub">Our systems say we have information linked to this device. Please review.</div>
+
+    <div class="info-grid" aria-hidden="false">
+      <div class="info" id="info-1">
+        <h4>Device</h4>
+        <p>Windows • Browser: Chrome</p>
+      </div>
+      <div class="info" id="info-2">
+        <h4>Location</h4>
+        <p>Approximate region: Unknown</p>
+      </div>
+      <div class="info" id="info-3">
+        <h4>Known data</h4>
+        <p>Email: <strong>user@example.com</strong></p>
+      </div>
+    </div>
+
+    <div class="fake-console" id="console" aria-hidden="false">
+      <div>[12:02:45] connecting... ✓</div>
+      <div>[12:02:47] dumping: credentials.json ... ✓</div>
+      <div>[12:02:48] extracting contacts ... ✓</div>
+      <div id="console-more">[12:02:49] preparing upload to remote server ... ✓</div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn-danger" id="panic">Panic — Lock Device</button>
+      <button class="btn-cool" id="revealBtn">Reveal / It's a Prank</button>
+      <button class="btn-cool" id="safetyTips">Security Tips</button>
+    </div>
+
+    <div class="note" id="consent-note">
+      <strong>Important:</strong> This prank page does <em>not</em> access your real data. It is fully local and non-collecting. Always get permission before pranking someone.
+    </div>
+
+    <div class="reveal" id="reveal">
+      <h3>Relax — Nothing was taken 😅</h3>
+      <p>This is a harmless mock-up for fun. This page does not send, store, or collect any personal information. If you want a version that shows only a friendly message (no scary language), say so and I'll give it to you.</p>
+      <p style="margin-top:8px"><strong>Want to prank responsibly?</strong> Tell the person immediately after and share real security tips — don't scare or embarrass them.</p>
+    </div>
+
+    <div class="footer">
+      <div>Made as a harmless visual mockup • No tracking • No external requests</div>
+    </div>
+  </div>
+
+  <script>
+    // purely client-side, no data leaving the page
+    (function(){
+      const revealBtn = document.getElementById('revealBtn');
+      const reveal = document.getElementById('reveal');
+      const consoleMore = document.getElementById('console-more');
+      const panic = document.getElementById('panic');
+      const safetyTips = document.getElementById('safetyTips');
+
+      // subtle fake typing into the console (visual only)
+      let i = 0, messages = [
+        "[12:02:50] harvesting saved passwords ... ✓",
+        "[12:02:51] extracting photos ... ✓",
+        "[12:02:52] compiling contact list ... ✓",
+        "[12:02:53] all files encrypted: ransom-note.txt created ✓"
+      ];
+      function tick(){
+        if(i < messages.length){
+          const d = document.createElement('div');
+          d.textContent = messages[i++];
+          document.getElementById('console').appendChild(d);
+        } else {
+          clearInterval(interval);
+        }
+      }
+      let interval = setInterval(tick, 900);
+
+      // Panic button - just shows an alert (no actions)
+      panic.addEventListener('click', ()=> {
+        alert("This is a mock page. No action will be taken. If you are actually worried about device security, shut down and disconnect from the internet and contact a trusted adult or IT support.");
+      });
+
+      revealBtn.addEventListener('click', ()=>{
+        reveal.style.display = 'block';
+        reveal.scrollIntoView({behavior:'smooth'});
+      });
+
+      safetyTips.addEventListener('click', ()=>{
+        alert("Security tips:\n1) Change passwords on another device.\n2) Enable two-factor authentication.\n3) Update OS and browser.\n4) Do not click suspicious links. Consult an adult or IT support if concerned.");
+      });
+
+      // Do not attempt to gather real info - for demonstration only.
+      // We're intentionally not using geolocation, network calls, or forms.
+    })();
+  </script>
+</body>
+</html>
